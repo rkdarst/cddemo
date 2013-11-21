@@ -127,8 +127,8 @@ while True:
     best_dQ = -1e9
     best_comm = None
     best_merge_with = None
-    for c1 in comms.keys():
-        for c_neighbor in comm_neighbors(g, c1):
+    for c1 in shuffled(comms.keys()):
+        for c_neighbor in shuffled(comm_neighbors(g, c1)):
             assert c1 != c_neighbor
             # No need to test merge every pair twice.
             if c1 > c_neighbor:
@@ -162,6 +162,11 @@ while True:
     # Let's do another test.  Ensure that our dQ is equal to the
     # actual computed modularity change.
     assert abs(Q-last_Q-best_dQ) < 1e-10
+    # Test against my code
+    import pcd.cmty
+    cmtys = pcd.cmty.Communities(comms)
+    Qp = cmtys.Q(g)
+    assert abs(Q-Qp) < 1e-10
 
     print Q, dQ, Q-last_Q-best_dQ
     if Q > best_Q:
