@@ -47,6 +47,21 @@ assert len(boundary_edges) == len(networkx.edge_boundary(g, group2))
 print "Cut size is", len(boundary_edges)
 
 
+
+import pcd.graphs
+g = pcd.graphs.karate_club()
+#g = pcd.graphs.dolphins()
+#g = pcd.graphs.football()
+nodes = g.nodes()
+#from fitz import interactnow
+
+def shuffled(l):
+    l = list(l)
+    import random
+    random.shuffle(l)
+    return l
+
+
 # Communities:
 
 def comm_neighbors(g, c):
@@ -108,16 +123,18 @@ def modularity2(g, comms):
                 continue
             if g.has_edge(n1, n2):
                 Q += 1
+            #if n1 == n2: continue
             Q += - g.degree(n1)*g.degree(n2) / (2.*M)
     Q = Q / (2.*M)
     return Q
+#modularity = modularity2
 
 # Make initial communities - each node in one community.
 comms = dict()
 node_comms = dict()
-for n in nodes:
-    comms[n] = set((n, ))
-    node_comms[n] = n
+for i, n in enumerate(nodes):
+    comms[i] = set((n, ))
+    node_comms[n] = i
 
 
 last_Q = modularity(g, comms)
@@ -163,15 +180,26 @@ while True:
     # actual computed modularity change.
     assert abs(Q-last_Q-best_dQ) < 1e-10
 
-    print Q, dQ, Q-last_Q-best_dQ
+    print Q, best_dQ, len(comms)
     if Q > best_Q:
         best_Q = Q
         best_comms = copy.deepcopy(comms)
 
+    if len(comms) == 2:
+        comms_2 = copy.deepcopy(comms)
+
     last_Q = Q
 
-print best_Q
-print best_comms
+print "Optimal modularity:", best_Q
+print "Optimal number of communities:", len(best_comms)
+print "Optimal communities:", best_comms
 
+group1, group2 = comms_2.values()
+#print group1
+#print group2
 
+print comms_2
+print modularity(g, comms_2)
 
+boundary_edges = networkx.edge_boundary(g, group1)
+print "Cut, Newman algorithm: ", len(boundary_edges)
