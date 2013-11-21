@@ -17,7 +17,7 @@ def laplacian_matrix(g, nodes):
     return L
 
 
-
+# Get karate club graph from networkx.
 g = networkx.karate_club_graph()
 
 nodes = g.nodes()
@@ -50,6 +50,7 @@ print "Cut size is", len(boundary_edges)
 # Communities:
 
 def comm_neighbors(g, c):
+    """Return all communities connected to c"""
     neighbors = set()
     for n in comms[c]:
         neighbor_nodes = g.neighbors(n)
@@ -58,23 +59,35 @@ def comm_neighbors(g, c):
         neighbors.update(neighbor_comms)
     return neighbors
 def comm_degree(g, c):
+    """Total degree of community"""
     degree = 0
     for n in comms[c]:
         degree += g.degree(n)
     return degree
 def deltaQ(g, c1, c2):
+    """Change of modularity if c1 and c2 were merged"""
     # The formula for modulary change in the paper is deceiving.
     # Derive it yourself:
     #  deltaQ = E12/M - 2*K1*K2/(2M)^2
     M = float(g.number_of_edges())
     E12 = len(networkx.edge_boundary(g, comms[c1], comms[c2]))
+    #E1 = g.subgraph(comms[c1]).number_of_edges()
+    #E2 = g.subgraph(comms[c2]).number_of_edges()
     K1 = sum(g.degree(n) for n in comms[c1])
     K2 = sum(g.degree(n) for n in comms[c2])
     #dQ = 2*(eij - ai*aj)
     dQ = E12/M - 2*K1*K2/(2*M)**2
     return dQ
 
+    # Newman method:
+    e12 = E12/M
+    a1 = (K1 - E1)/M
+    a2 = (K2 - E2)/M
+    return e12 - a1*a2
+
+
 def modularity(g, comms):
+    """Comput modularity: Community-centric version."""
     Q = 0.0
     M = float(g.number_of_edges())
     for c, nodes in comms.iteritems():
@@ -82,6 +95,21 @@ def modularity(g, comms):
         assert E_in/2 == E_in//2
         K_in = sum(g.degree(n) for n in nodes)
         Q += E_in/(M*1) - (K_in/(2*M))**2
+    return Q
+def modularity2(g, comms):
+    """Compute modularity: node-centric version"""
+    Q = 0.0
+    M = float(g.number_of_edges())
+    for n1 in g.nodes_iter():
+        for n2 in g.nodes_iter():
+            c1 = node_comms[n1]
+            c2 = node_comms[n2]
+            if c1 != c2:
+                continue
+            if g.has_edge(n1, n2):
+                Q += 1
+            Q += - g.degree(n1)*g.degree(n2) / (2.*M)
+    Q = Q / (2.*M)
     return Q
 
 # Make initial communities - each node in one community.
@@ -94,7 +122,7 @@ for n in nodes:
 
 last_Q = modularity(g, comms)
 best_Q = last_Q
-best_comms = dict(comms.iteritems())
+best_comms = copy.deepcopy(comms)
 while True:
     best_dQ = -1e9
     best_comm = None
@@ -110,9 +138,9 @@ while True:
                 best_dQ = dQ
                 best_comm = c1
                 best_merge_with = c_neighbor
+    # This will break once there is nothing more to merge.
     if best_comm is None:
         break
-    #print "dQ", dQ
     #if dQ < 0:
     #    break
     # If we got here, we accept this
@@ -126,12 +154,21 @@ while True:
 
 
     Q = modularity(g, comms)
-    print Q, dQ, Q-last_Q-dQ#, comms[c1]
-    last_Q = Q
+    # To show that we are computing modularity correctly, require that
+    # the two different modularity computations match to within
+    # floating point precision.
+    Q2 = modularity2(g, comms)
+    assert abs(Q-Q2) < 1e-10
+    # Let's do another test.  Ensure that our dQ is equal to the
+    # actual computed modularity change.
+    assert abs(Q-last_Q-best_dQ) < 1e-10
+
+    print Q, dQ, Q-last_Q-best_dQ
     if Q > best_Q:
         best_Q = Q
-        #print comms
         best_comms = copy.deepcopy(comms)
+
+    last_Q = Q
 
 print best_Q
 print best_comms
