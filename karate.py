@@ -30,7 +30,7 @@ ev_ranks = numpy.argsort(ev)
 
 print "should be zero:", ev[ev_ranks[0]]
 print "next eigenvalue:", ev[ev_ranks[1]]
-evec1 = evec[ev_ranks[1]]
+evec1 = evec[:,ev_ranks[1]]
 
 group1 = [ nodes[i] for i in range(len(evec1)) if evec1[i] >= 0 ]
 group2 = [ nodes[i] for i in range(len(evec1)) if evec1[i] < 0 ]
