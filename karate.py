@@ -32,20 +32,24 @@ def print_group(l):
 # Get karate club graph from networkx.
 g = networkx.karate_club_graph()
 #networkx.write_edgelist(g, 'karate.txt', data=False)
-
-
 nodes = g.nodes()
+
+print "Karate club"
+print "Number of nodes:", len(g)
+print "Number of edges:", g.number_of_edges()
+
+# Calculate laplacian.
 L = laplacian_matrix(g, nodes)
-
+# Use numpy to do the eigenproblem.
 ev, evec = numpy.linalg.eigh(L)
-
+# The kth eigenvector is evec[:, k]
 # Sort by eigenvalue
 ev_ranks = numpy.argsort(ev)
 
 # Do a clustering based on positive/negative Laplacian values:
 print "Laplacian based clustering:"
-print "should be zero:", ev[ev_ranks[0]]
-print "next eigenvalue:", ev[ev_ranks[1]]
+print "Zeroth eigenvalue (should be zero):", ev[ev_ranks[0]]
+print "First eigenvasue:", ev[ev_ranks[1]]
 evec1 = evec[:,ev_ranks[1]]
 
 group1 = [ nodes[i] for i in range(len(evec1)) if evec1[i] >= 0 ]
@@ -65,12 +69,13 @@ print "group1:",
 print_group(group1)
 print "group2:",
 print_group(group2)
-
+print
 
 # Do a clustering where the lowest 16 eigenvalues are in one cluster,
 # and then below, a clustering where the lowest 18 eigenvalues are in
 # one cluster.
 ranks = numpy.argsort(evec1)
+print "Clustering based on 16 lowest values of eigenvalue 1"
 group1 = set(nodes[i] for i in ranks[:16])
 group2 = set(nodes[i] for i in ranks[16:])
 boundary_edges = networkx.edge_boundary(g, group1)
@@ -82,6 +87,7 @@ print "group2:",
 print_group(group2)
 print
 
+print "Clustering based on 18 lowest values of eigenvalue 1"
 group1 = set(nodes[i] for i in ranks[:18])
 group2 = set(nodes[i] for i in ranks[18:])
 boundary_edges = networkx.edge_boundary(g, group1)
@@ -99,7 +105,7 @@ print
 #
 # Part 2: Newman algorithm for modularity clustering.
 #
-
+print "Newman fast modularity optimization algorithm (http://arxiv.org/pdf/cond-mat/0309508v1.pdf)."
 
 import pcd.graphs
 g = pcd.graphs.karate_club()
@@ -246,10 +252,14 @@ while True:
 
     last_Q = Q
 
+print
 print "Results at the maximal modularity level:"
 print "Optimal modularity:", best_Q
 print "Optimal number of communities:", len(best_comms)
-print "Optimal communities:", best_comms
+print "Optimal communities:"
+for cname, ns in best_comms.iteritems():
+    print "Group %s:"%cname,
+    print_group(ns)
 print
 
 # What is the results at the the two-community level of the

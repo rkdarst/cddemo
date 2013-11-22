@@ -7,7 +7,15 @@ get_webgraph:
 
 DEST=amor:.www/cddemo/
 copy_files:
-	scp www-normalized.dat $(DEST)
-	scp webgraph-S.p* $(DEST)
+	@scp www-normalized.dat $(DEST)
+	@scp webgraph-S.p* $(DEST)
+	@scp karate-output.txt $(DEST)
+	@scp karate.txt $(DEST)
+	@scp karate-instructions.txt $(DEST)
+	@scp webgraph-instructions.txt $(DEST)
+
+run_karate:
+	python karate.py | tee karate-output.txt
+
 
 
