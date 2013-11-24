@@ -28,25 +28,26 @@ def pl_fit(data, xmin):
     return alpha
 
 def run_method(methname):
-    sizes = [ ]
-    for i in range(10):
-        cda = getattr(algorithms, methname)
-        cd = cda(g)
-        sizes.extend(cd.cmtys.cmtysizes().itervalues())
-    sizes.sort()
+    cache_filename = 'sizes.%s.pickle'%methname
+    import os
     import pickle
-    pickle.dump(sizes, open('sizes.%s.pickle'%methname, 'w'), -1)
-    #import pickle
-    #sizes = pickle.load(open('sizes.%s.pickle'%methname))
-    #print 'loaded'
-    #sizes.sort()
+    if os.path.exists(cache_filename):
+        sizes = pickle.load(open('sizes.%s.pickle'%methname))
+    else:
+        sizes = [ ]
+        for i in range(10):
+            cda = getattr(algorithms, methname)
+            cd = cda(g)
+            sizes.extend(cd.cmtys.cmtysizes().itervalues())
+        sizes.sort()
+        pickle.dump(sizes, open('sizes.%s.pickle'%methname, 'w'), -1)
 
-    #sizes = sizes[:-50]
-    #sizes = [x for x in sizes if x>=10]
-    #sizes = [x for x in sizes if x<=500]
     Ncmty = len(sizes)
     print Ncmty, min(sizes), max(sizes)
 
+
+    # Fit the sizes to a power law.  There are three different codes
+    # supposobly doing the same thing here.
     # My method
     xmin = 10
     alpha = pl_fit(sizes, xmin=10)
@@ -61,18 +62,22 @@ def run_method(methname):
     #                           discrete=False,
     #                           )
     #L = fitter._likelihood
-    #s_params = "alpha=%s, xmin=%s, L=%s"%(alpha,xmin,L)
-    s_params = "alpha=%0.2f, xmin=%s"%(alpha,xmin)
 
     print "Fitted to powerlaw with %s"%s_params
+
+    # Label for the plot.
+    s_params = "alpha=%0.2f, xmin=%s"%(alpha,xmin)
+
+    # Bins for histogram
     bins = bins=numpy.logspace(0,4, num=(4-0)*11+1, base=10)
 
-
+    # Plot cCDF and fit.
+    pylab.cla()
     pylab.plot(sizes, [(Ncmty-i-1)/float(Ncmty) for i in range(Ncmty)],
                label="cCDF")
     N = xmin**(-alpha+1)/(alpha-1)
     pylab.plot(bins, bins**(-alpha+1)/(alpha-1)/N,
-               label="CDF($x^{-%0.2f}$)"%alpha)
+               label="cCDF($x^{-%0.2f}$)"%alpha)
     pylab.xscale('log')
     pylab.yscale('log')
     pylab.title("ND webgraph - complimentary CDF - %s"%methname)
@@ -86,23 +91,25 @@ def run_method(methname):
     #from fitz import interactnow
 
 
-    import collections
-    hist = collections.defaultdict(int)
-    from math import exp, log
-    log2 = lambda x: log(x)/log(1.1)
-    exp2 = lambda x: 1.1**x
-    for x in sizes:
-        i = int(log2(x))
-        hist[i] += 1
-    low = min(hist)
-    high = max(hist)
-    bins = numpy.arange(low, high+1)
+    # Generate histogram manually.  Then plot CDF.
 
-    y = [
-        #hist[i]/(exp2(i)-exp2(i-1))
-        hist[i]/float(sum(hist.values()))
-        for i in bins]
-    bins = exp2(bins)
+    #import collections
+    #hist = collections.defaultdict(int)
+    #from math import exp, log
+    #log2 = lambda x: log(x)/log(1.1)
+    #exp2 = lambda x: 1.1**x
+    #for x in sizes:
+    #    i = int(log2(x))
+    #    hist[i] += 1
+    #low = min(hist)
+    #high = max(hist)
+    #bins = numpy.arange(low, high+1)
+    #
+    #y = [
+    #    #hist[i]/(exp2(i)-exp2(i-1))
+    #    hist[i]/float(sum(hist.values()))
+    #    for i in bins]
+    #bins = exp2(bins)
 
     aderiv = lambda x: x**(-alpha+1)/(-alpha+1)
 
