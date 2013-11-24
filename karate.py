@@ -25,14 +25,17 @@ def print_group(l):
     You could also simply do:
       print ' '.join(str(n) for n in l)
     """
-    for n in l:
-        print n,
+    for n in sorted(l):
+        print g.node[n].get('label', n),
     print
 
 # Get karate club graph from networkx.
 g = networkx.karate_club_graph()
 #networkx.write_edgelist(g, 'karate.txt', data=False)
 nodes = g.nodes()
+# Relabel nodes to 1-indexed:
+for n in g.nodes():
+    g.node[n]['label'] = n+1
 
 print "Karate club"
 print "Number of nodes:", len(g)
@@ -110,6 +113,10 @@ print "Newman fast modularity optimization algorithm (http://arxiv.org/pdf/cond-
 import pcd.graphs
 g = pcd.graphs.karate_club()
 nodes = g.nodes()
+# Relabel nodes to 1-indexed:
+for n in g.nodes():
+    g.node[n]['label'] = n+1
+
 
 def shuffled(l):
     """Make a shuffled version of a list."""
