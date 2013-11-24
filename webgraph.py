@@ -6,8 +6,15 @@ import networkx
 
 g = networkx.read_edgelist('www.dat', create_using=networkx.Graph(),
                            nodetype=int)
-
-#networkx.write_edgelist(g, 'www-normalized.dat')
+print "number of nodes:", len(g)
+print "number of edges:", g.number_of_edges()
+print "number of self-loops:", g.number_of_selfloops()
+# Remove self-loops
+for n1, n2 in g.selfloop_edges():
+    g.remove_edge(n1, n2)
+print "number of edges without self-loops:", g.number_of_edges()
+#networkx.write_edgelist(g, 'www-normalized.dat', data=False)
+#raise
 
 
 def remove_fraction(g, f, style='random'):
@@ -55,7 +62,6 @@ def lcs(g):
 def compute_S(g, f, style):
     """Compute fraction of graph connected, after removing `f` nodes.
 
-    
     """
     if f == 1.0:
         raise ValueError("Removing all nodes doesn't work!")

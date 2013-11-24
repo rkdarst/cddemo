@@ -1,0 +1,23 @@
+
+
+Laplacian based partition:
+
+Lowest non-zero eigenvalue: 0.468525226701
+Group sizes: 19 15
+Cut size is 10
+
+Is there more than one minimum cut?  See the figure on this page in
+the paper:
+  http://arxiv.org/pdf/0803.2548.pdf
+
+
+
+
+Implement the algorithm found in this paper:
+  http://arxiv.org/pdf/cond-mat/0309508v1.pdf
+Notes:
+- Derive the formula for \Delta Q yourself.  The variables e_ij and
+  a_i, a_j in the paper are confusing.
+
+
+Here 

@@ -1,0 +1,45 @@
+
+
+The data we are using can be found here:
+  http://www3.nd.edu/~networks/resources.htm
+under the "World-Wide-Web:" section.  You can find the original data,
+and paper with some information (in PDF form).
+
+
+In an *directed* graph, you should get the following parameters:
+  number of nodes: 325729
+  number of edges: 1497134
+  number of self-loops: 27455
+  number of edges without self-loops: 1469679
+This is what they use in the paper.  Note the number of links without
+self-loop is off by one.
+
+In the *undirected* graph (which you will use), you should get these
+parameters:
+  number of nodes: 325729
+  number of edges: 1117563
+  number of self-loops: 27455
+  number of edges without self-loops: 1090108
+
+In the file www-normalized.dat, you should get this:
+  number of nodes: 325729
+  number of edges: 1090108
+
+Load the file www-normalized.dat, and show that you reproduce these
+numbers.
+
+
+Perform the robustness tests:
+1) remove a fraction f of the nodes, picked at random, along with all
+   their incident links
+2) compute the size S of the largest connected component, and divide
+   it by the total number of nodes of the network (of the initial
+   network)
+3) plot S as a function of f, with f going from 0 to 1.
+4) Repeat the procedure by removing the fraction f of nodes with
+   largest degrees.
+
+When you remove the nodes randomly, you have a stochastic variation,
+so you should repeat this multiple times and average.  When you remove
+them by the highest-degree, this is a fixed process (ignoring random
+order of same-degree nodes), so you only need to do this once.
