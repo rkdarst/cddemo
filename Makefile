@@ -13,6 +13,7 @@ copy_files:
 	@scp karate.txt $(DEST)
 	@scp karate-instructions.txt $(DEST)
 	@scp webgraph-instructions.txt $(DEST)
+	@scp webgraph-*-sizes-*.p* $(DEST)
 
 run_karate:
 	python karate.py | tee karate-output.txt
