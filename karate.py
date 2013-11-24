@@ -90,6 +90,14 @@ print "group2:",
 print_group(group2)
 print
 
+# Write this to pajek:
+import pcd.ioutil, pcd.cmty
+cmtys = pcd.cmty.Communities({1:group1, 2:group2})
+g2 = g.copy()
+cmtys.load_networkx_custom(g2, attrname='cmty')
+networkx.write_gml(g2, 'karate-partition.gml')
+#pcd.ioutil.write_pajek('karate-partition.net', g, cmtys)
+
 print "Clustering based on 18 lowest values of eigenvalue 1"
 group1 = set(nodes[i] for i in ranks[:18])
 group2 = set(nodes[i] for i in ranks[18:])
